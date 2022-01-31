@@ -1,3 +1,11 @@
+/*
+  Contains the function that deals with commands sent to the bot
+
+  to do:
+  - allow adding and removing from the bannd words list
+*/
+
+
 exports.botCommands = function(msg){
   // BOT COMMANDS
   if(msg.content.slice(0, 2) === "--"){

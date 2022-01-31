@@ -1,3 +1,14 @@
+/*
+  Contains a function that recieves a message object from the discord server and
+  determines if the message contains a banned word from a list of banned words
+
+  todo:
+  - determine if the banned word is under a spoiler tag, if so do not warn the person
+  - attach this to a DB so that it is per server and not the same list of words
+  this means that there should also be a command to add and remove an item from
+  the list in the commands 
+*/
+
 exports.bannedPhrases = function(msg){
   function checkSpoilerTags(m){
     // check if the message sent is under a spoiler tag, we do not want to give a warning

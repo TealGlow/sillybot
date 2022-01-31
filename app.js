@@ -17,7 +17,7 @@ const client_ready = client.on('ready', ()=>{
 client.on('messageCreate', async (msg)=>{
   // Checks each message sent from a user, if their message contains any of the banned phrases then they
   // are warned to change it.
-  console.log(msg);
+  console.log(msg.flags);
 
   const msg_check = await bp.bannedPhrases(msg);
   if(msg_check){
