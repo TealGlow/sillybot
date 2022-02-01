@@ -1,7 +1,7 @@
 require('dotenv').config();
 const Discord = require('discord.js');
-const bp = require('./banned_phrases');
-const bc = require('./bot_commands');
+const bp = require('./bot-modules/banned_phrases');
+const bc = require('./bot-modules/bot_commands');
 
 const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]}); // create a new client
 
@@ -17,7 +17,6 @@ const client_ready = client.on('ready', ()=>{
 client.on('messageCreate', async (msg)=>{
   // Checks each message sent from a user, if their message contains any of the banned phrases then they
   // are warned to change it.
-  console.log(msg.flags);
 
   const msg_check = await bp.bannedPhrases(msg);
   if(msg_check){
