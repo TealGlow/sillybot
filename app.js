@@ -1,7 +1,7 @@
 require('dotenv').config();
 const Discord = require('discord.js');
-const bp = require('./bot-modules/banned_phrases');
-const bc = require('./bot-modules/bot_commands');
+const bp = require('./bot_modules/banned_phrases');
+const bc = require('./bot_modules/bot_commands');
 
 const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]}); // create a new client
 
@@ -10,6 +10,15 @@ const client_ready = client.on('ready', ()=>{
   // only accept commands when the client is ready
   // client connected
   console.log(`Logged in as ${client.user.tag}!`);
+});
+
+
+client.on("guildCreate", (guild)=>{
+  // on bot server join
+
+  // TODO: when bot joins a server we are going to create a new item in the db
+  // with an empty array for banned phrases
+  console.log(`Joined new guild ${guild.name}`);
 });
 
 
