@@ -26,7 +26,8 @@ exports.bannedPhrases = function(msg){
   // if it is not spoiler tagged, then we are going to check for a banned phrase
   if(!checkSpoilerTags(msg.content)){
     const banned_word_list = ["vomit", "throw up", "vom", "puke", "puking", "puked", "threw up"];
-    
+
+    // storing this for checking the db on banned word list later
     const guildId = msg.guildId;
     const channelId = msg.channelId;
 
