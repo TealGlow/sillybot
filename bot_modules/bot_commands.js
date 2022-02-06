@@ -14,8 +14,8 @@ exports.botCommands = function(msg){
     // and send replies to these commands in a certain channel.  this
     // will be its own bot channel
     switch(msg.content){
-      case '--add thread':
-        console.log("ADD THREAD")
+      case '--show bp':
+        console.log("show banned")
         break;
     }
 
