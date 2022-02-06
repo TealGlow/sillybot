@@ -42,7 +42,7 @@ exports.createNewServerList = async function (guildId){
   try{
     // connect to the db
     await Client.connect();
-    await createServerList(myDb, guildId);
+    await upsertBannedPhrasesByGuildId(myDb, guildId, {bannedPhrases:[]});
     success = true;
   }catch(error){
     console.error(error);
@@ -107,7 +107,7 @@ async function findOneGuildListById(myDb, guildId){
   if(result){
     console.log(`Found a Guild with that id: ${guildId}`);
     console.log(result.bannedPhrases);
-    return(JSON.parse(JSON.stringify(result.bannedPhrases)));
+    return(result.bannedPhrases);
   }else{
     console.log("Did not find a Guild with that id.");
     return([]);

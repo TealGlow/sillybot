@@ -44,7 +44,7 @@ client.on('messageCreate', async (msg)=>{
     };
     msg.reply(msg_reply);
   }
-  
+
   // BOT COMMANDS
   //const msg_command_reply = bc.botCommands(msg);
   switch(msg.content){
@@ -52,6 +52,7 @@ client.on('messageCreate', async (msg)=>{
       // SHOW BANNED PHRASES FOR THE SERVER
       try{
         var res = await db.findByGuildId(msg.guildId);
+
         if(res.length < 1){
           msg.reply(`There are no banned pharases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
         }else{
