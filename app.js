@@ -4,7 +4,8 @@ const bp = require('./bot_modules/banned_phrases');
 const bc = require('./bot_modules/bot_commands');
 const db = require('./dbtools/db_funcs');
 
-const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]}); // create a new client
+// create a new Discord Client
+const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]});
 
 // LOGS THE BOT IN
 const client_ready = client.on('ready', ()=>{
@@ -17,11 +18,12 @@ const client_ready = client.on('ready', ()=>{
 client.on("guildCreate", (guild)=>{
   // on bot server join
 
-  // TODO: when bot joins a server we are going to create a new item in the db
-  // with an empty array for banned phrases
+  // when bot joins the server it initializes the banned
+  // phrase list to empty and adds the guild id to the
+  // mongodb
   console.log(`Joined new guild ${guild.name}`);
   try{
-    db.createNewServerList();
+    console.log(db.createNewServerList(guild.id));
     console.log(`New banned phrase list init`);
   }catch(error){
     console.error(error);
@@ -42,9 +44,25 @@ client.on('messageCreate', async (msg)=>{
     };
     msg.reply(msg_reply);
   }
-
+  
   // BOT COMMANDS
-  const msg_command_reply = bc.botCommands(msg);
+  //const msg_command_reply = bc.botCommands(msg);
+  switch(msg.content){
+    case '--show bp':
+      // SHOW BANNED PHRASES FOR THE SERVER
+      try{
+        var res = await db.findByGuildId(msg.guildId);
+        if(res.length < 1){
+          msg.reply(`There are no banned pharases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
+        }else{
+          console.log(res);
+          msg.reply(`Banned pharases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
+        }
+      }catch(error){
+        console.error(error);
+      }
+      break;
+  }
 });
 
 

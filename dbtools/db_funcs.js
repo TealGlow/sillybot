@@ -37,8 +37,7 @@ main().catch(console.error);*/
 exports.createNewServerList = async function (guildId){
   // exporting the ability to insert a new item into the server so that
   // when a guild joins a server it is automatically added to the collection
-  const Client = new MongoClient(url);
-  const myDb = Client.db("sillybotdb").collection("sillybot");
+
   let success = false;
   try{
     // connect to the db
@@ -81,6 +80,22 @@ async function createManyServerLists(myDb, toInsert){
 /*
       READ
 */
+
+exports.findByGuildId = async function(guildId){
+  let success = false;
+  try{
+    // connect to the db
+    await Client.connect();
+    success = await findOneGuildListById(myDb, guildId);
+  }catch(error){
+    console.error(error);
+  }finally{
+    // close connection to db
+    await Client.close();
+    return success;
+  }
+}
+
 // READ ONE ITEM (SEARCH FOR ONE ITEM)
 async function findOneGuildListById(myDb, guildId){
   /*
@@ -91,9 +106,11 @@ async function findOneGuildListById(myDb, guildId){
   const result = await myDb.findOne({guildId:guildId});
   if(result){
     console.log(`Found a Guild with that id: ${guildId}`);
-    console.log(result);
+    console.log(result.bannedPhrases);
+    return(JSON.parse(JSON.stringify(result.bannedPhrases)));
   }else{
     console.log("Did not find a Guild with that id.");
+    return([]);
   }
 }
 
