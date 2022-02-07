@@ -36,17 +36,25 @@ client.on('messageCreate', async (msg)=>{
   // Checks each message sent from a user, if their message contains any of the banned phrases then they
   // are warned to change it.
 
-  const msg_check = await bp.bannedPhrases(msg);
-  if(msg_check){
-    const msg_reply = {
-      content:"Message contains banned phrase, please spoiler tag your message!",
-      files: ["./img/caught.png"]
-    };
-    msg.reply(msg_reply);
+  //const msg_check = await bp.bannedPhrases(msg);
+  try{
+    var res = await db.findByGuildId(msg.guildId);
+    //console.log(res);
+    const msg_check = await bp.bannedPhrases(msg, res);
+    if(msg_check){
+      const msg_reply = {
+        content:"Message contains banned phrase, please spoiler tag your message!",
+        files: ["./img/caught.png"]
+      };
+      msg.reply(msg_reply);
+    }
+  }catch(error){
+    console.error(error);
   }
 
+
   // BOT COMMANDS
-  //const msg_command_reply = bc.botCommands(msg);
+
   switch(msg.content){
     case '--show bp':
       // SHOW BANNED PHRASES FOR THE SERVER
@@ -54,10 +62,10 @@ client.on('messageCreate', async (msg)=>{
         var res = await db.findByGuildId(msg.guildId);
 
         if(res.length < 1){
-          msg.reply(`There are no banned pharases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
+          msg.reply(`There are no banned phrases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
         }else{
           console.log(res);
-          msg.reply(`Banned pharases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
+          msg.reply(`Banned phrases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
         }
       }catch(error){
         console.error(error);
