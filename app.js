@@ -37,24 +37,25 @@ client.on('messageCreate', async (msg)=>{
   // are warned to change it.
 
   //const msg_check = await bp.bannedPhrases(msg);
-  try{
-    var res = await db.findByGuildId(msg.guildId);
-    //console.log(res);
-    const msg_check = await bp.bannedPhrases(msg, res);
-    if(msg_check){
-      const msg_reply = {
-        content:"Message contains banned phrase, please spoiler tag your message!",
-        files: ["./img/caught.png"]
-      };
-      msg.reply(msg_reply);
+  if(msg.author.id != "891484880695857162"){
+    try{
+      var res = await db.findByGuildId(msg.guildId);
+      //console.log(res);
+      const msg_check = await bp.bannedPhrases(msg, res);
+      if(msg_check){
+        const msg_reply = {
+          content:"Message contains banned phrase, please spoiler tag your message!",
+          files: ["./img/caught.png"]
+        };
+        msg.reply(msg_reply);
+      }
+    }catch(error){
+      console.error(error);
     }
-  }catch(error){
-    console.error(error);
   }
 
 
   // BOT COMMANDS
-
   switch(msg.content){
     case '--show bp':
       // SHOW BANNED PHRASES FOR THE SERVER
@@ -69,6 +70,7 @@ client.on('messageCreate', async (msg)=>{
         }
       }catch(error){
         console.error(error);
+        break;
       }
       break;
   }
