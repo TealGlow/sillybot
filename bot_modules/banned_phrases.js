@@ -12,7 +12,7 @@ exports.bannedPhrases = function(msg, banned_word_list){
   const channelId = msg.channelId;
 
   // remove everything from the spoiler tags from the string to check
-  let rm = msg.content.replaceAll(/(?<=\|\|)(.*?)(?=\|\|)/gmi, "");
+  let rm = msg.content.replaceAll(/(?<=\|\|)(.*?)(?=\|\|)/gmi, "").toLowerCase();
   rm = rm.replaceAll("||", ""); // also remove the symbols
 
   if(rm.length > 0){

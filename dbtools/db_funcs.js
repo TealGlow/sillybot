@@ -106,7 +106,6 @@ async function findOneGuildListById(myDb, guildId){
   const result = await myDb.findOne({guildId:guildId});
   if(result){
     console.log(`Found a Guild with that id: ${guildId}`);
-    console.log(result.bannedPhrases);
     return(result.bannedPhrases);
   }else{
     console.log("Did not find a Guild with that id.");
@@ -124,7 +123,7 @@ async function findAllGuildListById(myDb, guildId){
   const result = await myDb.find({guildId:guildId}).toArray();
   if(result){
     console.log(`Found Guild(s) with that id: ${guildId}`);
-    console.log(result);
+    console.log("hello?",result);
   }else{
     console.log("Did not find a Guild with that id");
   }

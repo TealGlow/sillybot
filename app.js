@@ -40,7 +40,6 @@ client.on('messageCreate', async (msg)=>{
   if(msg.author.id != "891484880695857162"){
     try{
       var res = await db.findByGuildId(msg.guildId);
-      //console.log(res);
       const msg_check = await bp.bannedPhrases(msg, res);
       if(msg_check){
         const msg_reply = {
@@ -54,25 +53,44 @@ client.on('messageCreate', async (msg)=>{
     }
   }
 
-
   // BOT COMMANDS
-  switch(msg.content){
-    case '--show bp':
-      // SHOW BANNED PHRASES FOR THE SERVER
-      try{
-        var res = await db.findByGuildId(msg.guildId);
+  if(msg.content == '--show bp'){
+    try{
+      var res = await db.findByGuildId(msg.guildId);
 
-        if(res.length < 1){
-          msg.reply(`There are no banned phrases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
-        }else{
-          console.log(res);
-          msg.reply(`Banned phrases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
-        }
-      }catch(error){
-        console.error(error);
-        break;
+      if(res.length < 1){
+        msg.reply(`There are no banned phrases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
+      }else{
+        console.log("got the banned words from the server",res);
+        msg.reply(`Banned phrases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
       }
-      break;
+    }catch(error){
+      console.error(error);
+    }
+  }
+  else if(msg.content.includes('--add bp')){
+    var words = msg.content.replace('--add bp', "");
+    // cleaning the word list a little
+    var word_list = words.split(',');
+    var final_word_list=[]
+
+    for(var i=0; i<word_list.length; i++){
+      // remove leading spaces if so
+      word_list[i] = word_list[i].trim();
+      // add all words to lowercase, check all banned words at lowercase
+      word_list[i] = word_list[i].replaceAll(/[|&;$%@"<>()+#!,]/g, "").toLowerCase();
+      if(word_list[i].length>0){
+        // if the word still exists after being stripped,
+        // it is added to result array final_word_list
+        final_word_list.push(word_list[i]);
+      }
+    }
+    if(words.length<1){
+      // nothing added after the command, tell the user to
+      msg.reply(`Please type the word to add.`);
+    }else{
+      msg.reply(`Added word(s)!`)
+    }
   }
 });
 
