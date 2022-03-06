@@ -39,16 +39,11 @@ exports.handleAddBps = async function(toAdd, guildId){
     try{
       //var res = await db.findByGuildId(msg.guildId);
       var result = await db.upsertItemByGuildId(guildId, final_word_list);
-      if(result){
-        return(`Successfully added word(s) to banned phrases list. \nSee banned phrases using this command: \`\`\`--show bp\`\`\``);
-      }else{
-        // some sort of error on the db side
-        return(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
-      }
+      return result;
     }catch(error){
       console.error(error);
       // error on the db side.
-      return(`Error adding word(s) to banned phrases list, please try again or check the documentation. 2`);
+      return false;
     }
   }
 }
@@ -67,16 +62,11 @@ exports.handleRemoveBp = async function(toRemove, guildId){
     // remove the word from the db
     try{
       var result = await db.removeItemsInList(guildId, final_word_list);
-      if(result){
-        return(`Successfully removed word(s) from the banned phrases list. \nSee banned phrases using this command: \`\`\`--show bp\`\`\``);
-      }else{
-        // some sort of error on the db side
-        return(`Error removing word(s) from banned phrases list, please try again or check the documentation.`);
-      }
+      return result;
     }catch(error){
       console.error(error);
       // error on the db side.
-      return(`Error removing word(s) from banned phrases list, please try again or check the documentation.`);
+      return false;
     }
   }
 }

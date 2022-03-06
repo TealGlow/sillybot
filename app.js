@@ -36,7 +36,11 @@ client.on('messageCreate', async (msg)=>{
   // Checks each message sent from a user, if their message contains any of the banned phrases then they
   // are warned to change it.
 
-  if(msg.author.id != client.application.id && !msg.content.includes('--add bp') && !msg.content.includes('--remove bp') && !msg.content.includes('--show bp')){
+  // check each message for a banned phrase
+  if(msg.author.id != client.application.id
+    && !msg.content.includes('--add bp')
+    && !msg.content.includes('--remove bp')
+    && !msg.content.includes('--show bp')){
     try{
       var res = await db.findByGuildId(msg.guildId);
       const msg_check = await bp.bannedPhrases(msg, res);
@@ -62,12 +66,28 @@ client.on('messageCreate', async (msg)=>{
   else if(msg.content.startsWith('--add bp')){
     // add new banned phrase(s)
     var res2 = await bc.handleAddBps(msg.content, msg.guildId);
-    msg.reply(res2);
+
+    if(res2){
+      var show_bp = await bc.handleShowBp(msg.guildId);
+      msg.reply(show_bp);
+      return;
+    }else{
+      msg.reply("Error adding please try again later.");
+      return;
+    }
     return;
   }else if(msg.content.includes('--remove bp')){
     // remove banned phrase(s)
     var res3 = await bc.handleRemoveBp(msg.content, msg.guildId);
-    msg.reply(res3);
+
+    if(res3){
+      var show_bp = await bc.handleShowBp(msg.guildId);
+      msg.reply(show_bp);
+      return;
+    }else{
+      msg.reply("Error removing please try again later.");
+      return;
+    }
     return;
   }
 });
