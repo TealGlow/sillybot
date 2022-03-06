@@ -96,6 +96,22 @@ exports.findByGuildId = async function(guildId){
   }
 }
 
+exports.upsertItemByGuildId = async function(guildId, toAdd){
+  let success = false;
+  console.log("TO ADD", toAdd);
+  try{
+    // connect to the db
+    await Client.connect();
+    success = await upsertBannedPhrasesByGuildId(myDb, guildId, {bannedPhrases:toAdd});
+  }catch(error){
+    console.error(error);
+  }finally{
+    // close connection to db
+    await Client.close();
+    return success;
+  }
+}
+
 // READ ONE ITEM (SEARCH FOR ONE ITEM)
 async function findOneGuildListById(myDb, guildId){
   /*
@@ -140,13 +156,16 @@ async function upsertBannedPhrasesByGuildId(myDb, guildIdToUpdate, toAdd){
 
   // add the new item to the guildId's bannedPharases list, if the item already exists do nothing
   // if the guild does not exist, add it to the db
+  console.log("toAdd here", toAdd);
   const result = await myDb.updateOne({guildId:guildIdToUpdate}, {$addToSet:{bannedPhrases:{$each:toAdd.bannedPhrases}}}, {upsert:true});
   console.log(`${result.matchedCount} guildIds matched query criteria`);
 
   if(result.upsertedCount>0){
     console.log(`One guild was inserted with the guildid:${guildIdToUpdate} and db id: ${result.upsertedId}`);
+    return false;
   }else{
     console.log(`${result.modifiedCount} bannedPhrases list(s) updated`);
+    return true;
   }
 }
 

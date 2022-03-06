@@ -6,12 +6,13 @@ const db = require('./dbtools/db_funcs');
 
 // create a new Discord Client
 const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]});
-
+const bot_id = "891484880695857162";
 // LOGS THE BOT IN
 const client_ready = client.on('ready', ()=>{
   // only accept commands when the client is ready
   // client connected
   console.log(`Logged in as ${client.user.tag}!`);
+
 });
 
 
@@ -36,8 +37,7 @@ client.on('messageCreate', async (msg)=>{
   // Checks each message sent from a user, if their message contains any of the banned phrases then they
   // are warned to change it.
 
-  //const msg_check = await bp.bannedPhrases(msg);
-  if(msg.author.id != "891484880695857162"){
+  if(msg.author.id != bot_id && !msg.content.includes('--add bp')){
     try{
       var res = await db.findByGuildId(msg.guildId);
       const msg_check = await bp.bannedPhrases(msg, res);
@@ -69,6 +69,10 @@ client.on('messageCreate', async (msg)=>{
     }
   }
   else if(msg.content.includes('--add bp')){
+    // add new banned phrase.  First clean the user input so
+    // that they cannot mess with the db, then split that string
+    // into an array and finally use the function to add it to
+    // the db based on the guild id.
     var words = msg.content.replace('--add bp', "");
     // cleaning the word list a little
     var word_list = words.split(',');
@@ -85,11 +89,24 @@ client.on('messageCreate', async (msg)=>{
         final_word_list.push(word_list[i]);
       }
     }
-    if(words.length<1){
+    if(final_word_list.length<1){
       // nothing added after the command, tell the user to
       msg.reply(`Please type the word to add.`);
     }else{
-      msg.reply(`Added word(s)!`)
+      // add the word to the db
+      console.log(final_word_list)
+      try{
+        //var res = await db.findByGuildId(msg.guildId);
+        var result = await db.upsertItemByGuildId(msg.guildId, final_word_list);
+        if(result){
+          msg.reply(`Successfully added word(s) to banned phrases list. Please use the --show bp command to see them!`);
+        }else{
+          msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
+        }
+      }catch(error){
+        console.error(error);
+        msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
+      }
     }
   }
 });
