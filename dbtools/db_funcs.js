@@ -104,7 +104,7 @@ exports.upsertItemByGuildId = async function(guildId, toAdd){
   try{
     // connect to the db
     await Client.connect();
-    //success = await upsertBannedPhrasesByGuildId(myDb, guildId, {bannedPhrases:toAdd});
+    success = await upsertBannedPhrasesByGuildId(myDb, guildId, {bannedPhrases:toAdd});
   }catch(error){
     console.error(error);
     return false;
@@ -115,20 +115,21 @@ exports.upsertItemByGuildId = async function(guildId, toAdd){
   }
 }
 
-/*exports.removeItemsInList = async function(guildId, toRemove){
+exports.removeItemsInList = async function(guildId, toRemove){
   let success = false;
   try{
     // connect to the db
     await Client.connect();
-    success = await deleteListingByGuildId(myDb, guildId, {bannedPhrases:toRemove});
+    success = await deleteItemsByGuildId(myDb, guildId, {bannedPhrases:toRemove});
   }catch(error){
     console.error(error);
+    return false;
   }finally{
     // close connection to db
     await Client.close();
     return success;
   }
-}*/
+}
 
 // READ ONE ITEM (SEARCH FOR ONE ITEM)
 async function findOneGuildListById(myDb, guildId){
@@ -200,7 +201,11 @@ async function deleteListingByGuildId(myDb, guildIdToDelete){
   console.log(`${result.deletedCount} guild(s) deleted.`);
 }
 
-/*async function deleteItemsByGuildId(myDb, guildId, toRemove){
-  const result = await myDb.update({guildId:guildId},{$pull:{bannedPhrases:{$each:toRemove.bannedPhrases}}});
-  console.log(`Deleted items in arr.`)
-}*/
+async function deleteItemsByGuildId(myDb, guildId, toRemove){
+  const result = await myDb.updateOne({guildId:guildId},{$pull:{bannedPhrases:{$in:toRemove.bannedPhrases}}});
+  if(result.modifiedCount > 0){
+    return true;
+  }else{
+    return false;
+  }
+}

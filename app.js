@@ -61,12 +61,11 @@ client.on('messageCreate', async (msg)=>{
   }
   else if(msg.content.startsWith('--add bp')){
     // add new banned phrase(s)
-    console.log("adding, for some reason");
     var res2 = await bc.handleAddBps(msg.content, msg.guildId);
     msg.reply(res2);
     return;
   }else if(msg.content.includes('--remove bp')){
-    // stuff here
+    // remove banned phrase(s)
     var res3 = await bc.handleRemoveBp(msg.content, msg.guildId);
     msg.reply(res3);
     return;
