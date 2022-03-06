@@ -57,54 +57,12 @@ client.on('messageCreate', async (msg)=>{
   if(msg.content == '--show bp'){
     // shows the banned phrases
     var res = await bc.handleShowBp(msg.guildId);
-    if(res){
-      msg.reply(res);
-    }else{
-      console.log("error");
-    }
+    msg.reply(res);
   }
   else if(msg.content.includes('--add bp')){
-    // add new banned phrase.  First clean the user input so
-    // that they cannot mess with the db, then split that string
-    // into an array and finally use the function to add it to
-    // the db based on the guild id.
-    var words = msg.content.replace('--add bp', "");
-    // cleaning the word list a little
-    var word_list = words.split(',');
-    var final_word_list=[]
-
-    for(var i=0; i<word_list.length; i++){
-      // remove leading spaces if so
-      word_list[i] = word_list[i].trim();
-      // add all words to lowercase, check all banned words at lowercase
-      word_list[i] = word_list[i].replaceAll(/[|&;$%@"<>()+#!,]/g, "").toLowerCase();
-      if(word_list[i].length>0){
-        // if the word still exists after being stripped,
-        // it is added to result array final_word_list
-        final_word_list.push(word_list[i]);
-      }
-    }
-    if(final_word_list.length<1){
-      // nothing added after the command, tell the user to
-      msg.reply(`Please type the word to add.`);
-    }else{
-      // add the word to the db
-      console.log(final_word_list)
-      try{
-        //var res = await db.findByGuildId(msg.guildId);
-        var result = await db.upsertItemByGuildId(msg.guildId, final_word_list);
-        if(result){
-          msg.reply(`Successfully added word(s) to banned phrases list. Please use the --show bp command to see them!`);
-        }else{
-          // some sort of error on the db side
-          msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
-        }
-      }catch(error){
-        console.error(error);
-        // error on the db side.
-        msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
-      }
-    }
+    // add new banned phrase(s)
+    var res = await bc.handleAddBps(msg.content, msg.guildId);
+    msg.reply(res);
   }else if(msg.content.includes('--remove bp')){
     // stuff here
     console.log("remove");
