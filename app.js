@@ -55,17 +55,12 @@ client.on('messageCreate', async (msg)=>{
 
   // BOT COMMANDS
   if(msg.content == '--show bp'){
-    try{
-      var res = await db.findByGuildId(msg.guildId);
-
-      if(res.length < 1){
-        msg.reply(`There are no banned phrases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
-      }else{
-        console.log("got the banned words from the server",res);
-        msg.reply(`Banned phrases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
-      }
-    }catch(error){
-      console.error(error);
+    // shows the banned phrases
+    var res = await bc.handleShowBp(msg.guildId);
+    if(res){
+      msg.reply(res);
+    }else{
+      console.log("error");
     }
   }
   else if(msg.content.includes('--add bp')){
@@ -101,13 +96,18 @@ client.on('messageCreate', async (msg)=>{
         if(result){
           msg.reply(`Successfully added word(s) to banned phrases list. Please use the --show bp command to see them!`);
         }else{
+          // some sort of error on the db side
           msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
         }
       }catch(error){
         console.error(error);
+        // error on the db side.
         msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
       }
     }
+  }else if(msg.content.includes('--remove bp')){
+    // stuff here
+    console.log("remove");
   }
 });
 

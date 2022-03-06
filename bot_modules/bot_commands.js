@@ -1,26 +1,22 @@
 /*
   Contains the function that deals with commands sent to the bot
-
-  to do:
-  - allow adding and removing from the bannd words list
 */
 
+const db = require('../dbtools/db_funcs');
 
-exports.botCommands = function(msg){
-  // BOT COMMANDS
-  if(msg.content.slice(0, 2) === "--"){
-    // this is a command for our bot
-    // want want to set this up so that they can only accept commands
-    // and send replies to these commands in a certain channel.  this
-    // will be its own bot channel
-    switch(msg.content){
-      case '--show bp':
-        console.log("show banned")
-        break;
+exports.handleShowBp = async function(guildId){
+  // handle showing bp for a guild.
+  try{
+    var res = await db.findByGuildId(guildId);
+
+    if(res.length < 1){
+      return(`There are no banned phrases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
+    }else{
+      console.log("got the banned words from the server",res);
+      return(`Banned phrases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
     }
-
-    const msg_body = msg.content.slice(2);
-    console.log(msg_body);
-    msg.reply("You entered a command, but commands do not work yet <3");
+  }catch(error){
+    console.error(error);
+    return false;
   }
-};
+}
