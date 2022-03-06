@@ -30,7 +30,7 @@ exports.handleAddBps = async function(toAdd, guildId){
   var words = toAdd.replace('--add bp', "");
   // cleaning the word list a little
   final_word_list = await cleanUserInputIntoArray(words);
-  
+
   if(final_word_list.length<1){
     // nothing added after the command, tell the user to
     return(`Please type the word to add.`);
@@ -48,11 +48,38 @@ exports.handleAddBps = async function(toAdd, guildId){
     }catch(error){
       console.error(error);
       // error on the db side.
-      return(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
+      return(`Error adding word(s) to banned phrases list, please try again or check the documentation. 2`);
     }
   }
 }
 
+
+exports.handleRemoveBp = async function(toRemove, guildId){
+  var words = toRemove.replace('--remove bp', "");
+  // cleaning the word list a little
+  final_word_list = await cleanUserInputIntoArray(words);
+
+  console.log(final_word_list);
+  if(final_word_list.length<1){
+    // nothing removed after the command, tell the user to
+    return(`Please type the word to remove.`);
+  }else{
+    // remove the word from the db
+    try{
+      var result = await db.removeItemsInList(guildId, final_word_list);
+      if(result){
+        return(`Successfully removed word(s) from the banned phrases list. \nSee banned phrases using this command: \`\`\`--show bp\`\`\``);
+      }else{
+        // some sort of error on the db side
+        return(`Error removing word(s) from banned phrases list, please try again or check the documentation.`);
+      }
+    }catch(error){
+      console.error(error);
+      // error on the db side.
+      return(`Error removing word(s) from banned phrases list, please try again or check the documentation.`);
+    }
+  }
+}
 
 const cleanUserInputIntoArray = async function(toClean){
   var word_list = toClean.split(',');

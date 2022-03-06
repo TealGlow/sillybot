@@ -34,7 +34,7 @@ main().catch(console.error);*/
 */
 // INSERT ONE ITEM
 
-exports.createNewServerList = async function (guildId){
+const createNewServerList = async function (guildId){
   // exporting the ability to insert a new item into the server so that
   // when a guild joins a server it is automatically added to the collection
 
@@ -46,12 +46,15 @@ exports.createNewServerList = async function (guildId){
     success = true;
   }catch(error){
     console.error(error);
+    return false;
   }finally{
     // close connection to db
     await Client.close();
     return success;
   }
 }
+// export this function
+exports.createNewServerList = createServerList;
 
 async function createServerList(myDb, guildId){
   /*
@@ -98,11 +101,26 @@ exports.findByGuildId = async function(guildId){
 
 exports.upsertItemByGuildId = async function(guildId, toAdd){
   let success = false;
-  console.log("TO ADD", toAdd);
   try{
     // connect to the db
     await Client.connect();
-    success = await upsertBannedPhrasesByGuildId(myDb, guildId, {bannedPhrases:toAdd});
+    //success = await upsertBannedPhrasesByGuildId(myDb, guildId, {bannedPhrases:toAdd});
+  }catch(error){
+    console.error(error);
+    return false;
+  }finally{
+    // close connection to db
+    await Client.close();
+    return success;
+  }
+}
+
+/*exports.removeItemsInList = async function(guildId, toRemove){
+  let success = false;
+  try{
+    // connect to the db
+    await Client.connect();
+    success = await deleteListingByGuildId(myDb, guildId, {bannedPhrases:toRemove});
   }catch(error){
     console.error(error);
   }finally{
@@ -110,7 +128,7 @@ exports.upsertItemByGuildId = async function(guildId, toAdd){
     await Client.close();
     return success;
   }
-}
+}*/
 
 // READ ONE ITEM (SEARCH FOR ONE ITEM)
 async function findOneGuildListById(myDb, guildId){
@@ -125,6 +143,7 @@ async function findOneGuildListById(myDb, guildId){
     return(result.bannedPhrases);
   }else{
     console.log("Did not find a Guild with that id.");
+    const result = await createNewServerList(guildId);
     return([]);
   }
 }
@@ -139,9 +158,10 @@ async function findAllGuildListById(myDb, guildId){
   const result = await myDb.find({guildId:guildId}).toArray();
   if(result){
     console.log(`Found Guild(s) with that id: ${guildId}`);
-    console.log("hello?",result);
   }else{
     console.log("Did not find a Guild with that id");
+    const result = await createNewServerList(guildId);
+    return([]);
   }
 }
 
@@ -179,3 +199,8 @@ async function deleteListingByGuildId(myDb, guildIdToDelete){
 
   console.log(`${result.deletedCount} guild(s) deleted.`);
 }
+
+/*async function deleteItemsByGuildId(myDb, guildId, toRemove){
+  const result = await myDb.update({guildId:guildId},{$pull:{bannedPhrases:{$each:toRemove.bannedPhrases}}});
+  console.log(`Deleted items in arr.`)
+}*/

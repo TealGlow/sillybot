@@ -6,13 +6,12 @@ const db = require('./dbtools/db_funcs');
 
 // create a new Discord Client
 const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]});
-const bot_id = "891484880695857162";
+
 // LOGS THE BOT IN
 const client_ready = client.on('ready', ()=>{
   // only accept commands when the client is ready
   // client connected
   console.log(`Logged in as ${client.user.tag}!`);
-
 });
 
 
@@ -37,7 +36,7 @@ client.on('messageCreate', async (msg)=>{
   // Checks each message sent from a user, if their message contains any of the banned phrases then they
   // are warned to change it.
 
-  if(msg.author.id != bot_id && !msg.content.includes('--add bp')){
+  if(msg.author.id != client.application.id && !msg.content.includes('--add bp') && !msg.content.includes('--remove bp') && !msg.content.includes('--show bp')){
     try{
       var res = await db.findByGuildId(msg.guildId);
       const msg_check = await bp.bannedPhrases(msg, res);
@@ -56,16 +55,21 @@ client.on('messageCreate', async (msg)=>{
   // BOT COMMANDS
   if(msg.content == '--show bp'){
     // shows the banned phrases
-    var res = await bc.handleShowBp(msg.guildId);
-    msg.reply(res);
+    var res1 = await bc.handleShowBp(msg.guildId);
+    msg.reply(res1);
+    return;
   }
-  else if(msg.content.includes('--add bp')){
+  else if(msg.content.startsWith('--add bp')){
     // add new banned phrase(s)
-    var res = await bc.handleAddBps(msg.content, msg.guildId);
-    msg.reply(res);
+    console.log("adding, for some reason");
+    var res2 = await bc.handleAddBps(msg.content, msg.guildId);
+    msg.reply(res2);
+    return;
   }else if(msg.content.includes('--remove bp')){
     // stuff here
-    console.log("remove");
+    var res3 = await bc.handleRemoveBp(msg.content, msg.guildId);
+    msg.reply(res3);
+    return;
   }
 });
 
