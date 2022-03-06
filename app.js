@@ -66,7 +66,6 @@ client.on('messageCreate', async (msg)=>{
   else if(msg.content.startsWith('--add bp')){
     // add new banned phrase(s)
     var res2 = await bc.handleAddBps(msg.content, msg.guildId);
-
     if(res2){
       var show_bp = await bc.handleShowBp(msg.guildId);
       msg.reply(show_bp);
@@ -76,10 +75,10 @@ client.on('messageCreate', async (msg)=>{
       return;
     }
     return;
-  }else if(msg.content.includes('--remove bp')){
+  }
+  else if(msg.content.includes('--remove bp')){
     // remove banned phrase(s)
     var res3 = await bc.handleRemoveBp(msg.content, msg.guildId);
-
     if(res3){
       var show_bp = await bc.handleShowBp(msg.guildId);
       msg.reply(show_bp);
@@ -89,6 +88,14 @@ client.on('messageCreate', async (msg)=>{
       return;
     }
     return;
+  }
+  else if(msg.content.includes('--help')){
+    // give the user documentation on how to use the
+    // bot.
+    msg.reply(`Documentation not yet written :(`);
+  }else if(msg.content.includes('--clear bp')){
+    // clears all the banned phrases for the server.
+    console.log("remove all");
   }
 });
 

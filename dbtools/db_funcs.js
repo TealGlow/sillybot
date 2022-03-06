@@ -6,28 +6,6 @@ const url = process.env.BOT_DB_URL;
 const Client = new MongoClient(url);
 const myDb = Client.db("sillybotdb").collection("sillybot");
 
-/*
-CRUD operations from the official mongodb website:
-https://www.mongodb.com/developer/quickstart/node-crud-tutorial/?utm_campaign=nodejsdeletedocuments&utm_source=facebook&utm_medium=organic_social
-*/
-/*
-async function main(){
-
-  try{
-    // connect to the db
-    await Client.connect();
-    // do stuff to db here
-    //await deleteListingByGuildId(myDb, "temp")
-  }catch(error){
-    console.error(error)
-  }finally{
-    // close connection to db
-    await Client.close();
-  }
-
-}
-
-main().catch(console.error);*/
 
 /*
       CREATE
@@ -54,7 +32,7 @@ const createNewServerList = async function (guildId){
   }
 }
 // export this function
-exports.createNewServerList = createServerList;
+exports.createNewServerList = createNewServerList;
 
 async function createServerList(myDb, guildId){
   /*
@@ -79,12 +57,15 @@ async function createManyServerLists(myDb, toInsert){
 }
 
 
-
 /*
       READ
 */
-
 exports.findByGuildId = async function(guildId){
+  /*
+  helper Function to find a guild based on their id. Returns
+  the list of banned phrases of the guild if it exists
+  if the guild does not exist we will add it to the db.
+  */
   let success = false;
   try{
     // connect to the db
@@ -100,6 +81,12 @@ exports.findByGuildId = async function(guildId){
 }
 
 exports.upsertItemByGuildId = async function(guildId, toAdd){
+  /*
+  Helper function to upsert an item based on guild id.
+  toAdd can be a list containing a single item or a
+  list of multiple items.
+  */
+
   let success = false;
   try{
     // connect to the db
@@ -116,6 +103,11 @@ exports.upsertItemByGuildId = async function(guildId, toAdd){
 }
 
 exports.removeItemsInList = async function(guildId, toRemove){
+  /*
+  Helper function to remove an item or a list of items.
+  Calls the db client and passes in the id, db object, and
+  list of banned phrases to remove.
+  */
   let success = false;
   try{
     // connect to the db
@@ -134,6 +126,8 @@ exports.removeItemsInList = async function(guildId, toRemove){
 // READ ONE ITEM (SEARCH FOR ONE ITEM)
 async function findOneGuildListById(myDb, guildId){
   /*
+  Function that finds one guild based on id
+
   CRUD operations from the official mongodb website:
   https://www.mongodb.com/developer/quickstart/node-crud-tutorial/?utm_campaign=nodejsdeletedocuments&utm_source=facebook&utm_medium=organic_social
   */
@@ -144,6 +138,7 @@ async function findOneGuildListById(myDb, guildId){
     return(result.bannedPhrases);
   }else{
     console.log("Did not find a Guild with that id.");
+    // if server DOES NOT EXIST, we are going to create it.
     const result = await createNewServerList(guildId);
     return([]);
   }
@@ -152,6 +147,10 @@ async function findOneGuildListById(myDb, guildId){
 // READ ALL ITEMS WITH ID
 async function findAllGuildListById(myDb, guildId){
   /*
+  Function that finds all guilds that share the same id.
+  A guild should only be added once, but this function
+  exists just in case.
+
   CRUD operations from the official mongodb website:
   https://www.mongodb.com/developer/quickstart/node-crud-tutorial/?utm_campaign=nodejsdeletedocuments&utm_source=facebook&utm_medium=organic_social
   */
@@ -161,6 +160,7 @@ async function findAllGuildListById(myDb, guildId){
     console.log(`Found Guild(s) with that id: ${guildId}`);
   }else{
     console.log("Did not find a Guild with that id");
+    // if server DOES NOT EXIST, we are going to create it.
     const result = await createNewServerList(guildId);
     return([]);
   }
@@ -171,6 +171,10 @@ async function findAllGuildListById(myDb, guildId){
 */
 async function upsertBannedPhrasesByGuildId(myDb, guildIdToUpdate, toAdd){
   /*
+  Function that upserts an item into the banned phrase list of a
+  guild based on guild id.  That is, if the item already exists,
+  do not add it, but if it does not exist, add it.
+
   CRUD operations from the official mongodb website:
   https://www.mongodb.com/developer/quickstart/node-crud-tutorial/?utm_campaign=nodejsdeletedocuments&utm_source=facebook&utm_medium=organic_social
   */
@@ -194,14 +198,21 @@ async function upsertBannedPhrasesByGuildId(myDb, guildIdToUpdate, toAdd){
 /*
       DELETE
 */
-
 async function deleteListingByGuildId(myDb, guildIdToDelete){
+  /*
+  Function that deletes a guild from the database.
+  */
   const result = await myDb.deleteOne({guildId:guildIdToDelete});
 
   console.log(`${result.deletedCount} guild(s) deleted.`);
 }
 
+
 async function deleteItemsByGuildId(myDb, guildId, toRemove){
+  /*
+  Function that removes a banned phrase from the list depending on
+  the guild id.  This can be an array of multiple items to remove
+  */
   const result = await myDb.updateOne({guildId:guildId},{$pull:{bannedPhrases:{$in:toRemove.bannedPhrases}}});
   if(result.modifiedCount > 0){
     return true;
