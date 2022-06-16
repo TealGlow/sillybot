@@ -71,6 +71,7 @@ exports.handleRemoveBp = async function(toRemove, guildId){
   }
 }
 
+// function for cleaning user input
 const cleanUserInputIntoArray = async function(toClean){
   var word_list = toClean.split(',');
   var final_word_list=[]
