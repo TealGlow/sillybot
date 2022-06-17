@@ -4,15 +4,20 @@ const bp = require('./bot_modules/banned_phrases');
 const bc = require('./bot_modules/bot_commands');
 const db = require('./dbtools/db_funcs');
 
+const command_list = [
+  '--show bp',
+  '--remove bp',
+  '--add bp'
+];
+
 // create a new Discord Client
 const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]});
-const bot_id = "891484880695857162";
+
 // LOGS THE BOT IN
 const client_ready = client.on('ready', ()=>{
   // only accept commands when the client is ready
   // client connected
   console.log(`Logged in as ${client.user.tag}!`);
-
 });
 
 
@@ -37,7 +42,8 @@ client.on('messageCreate', async (msg)=>{
   // Checks each message sent from a user, if their message contains any of the banned phrases then they
   // are warned to change it.
 
-  if(msg.author.id != bot_id && !msg.content.includes('--add bp')){
+  // check each message for a banned phrase
+  if(checkCmdValidity(msg) == 0){
     try{
       var res = await db.findByGuildId(msg.guildId);
       const msg_check = await bp.bannedPhrases(msg, res);
@@ -54,64 +60,80 @@ client.on('messageCreate', async (msg)=>{
   }
 
   // BOT COMMANDS
-  if(msg.content == '--show bp'){
-    try{
-      var res = await db.findByGuildId(msg.guildId);
-
-      if(res.length < 1){
-        msg.reply(`There are no banned phrases for this server yet! \n\nYou can add some by using the command: \`--add bp 'pharse here'\``);
-      }else{
-        console.log("got the banned words from the server",res);
-        msg.reply(`Banned phrases for the server: \n\`\`\`- ${res.join("\n- ")}\`\`\``);
-      }
-    }catch(error){
-      console.error(error);
-    }
+  if(msg.content.startsWith('--show bp')){
+    // shows the banned phrases
+    var res1 = await bc.handleShowBp(msg.guildId);
+    msg.reply(res1);
+    return;
   }
-  else if(msg.content.includes('--add bp')){
-    // add new banned phrase.  First clean the user input so
-    // that they cannot mess with the db, then split that string
-    // into an array and finally use the function to add it to
-    // the db based on the guild id.
-    var words = msg.content.replace('--add bp', "");
-    // cleaning the word list a little
-    var word_list = words.split(',');
-    var final_word_list=[]
-
-    for(var i=0; i<word_list.length; i++){
-      // remove leading spaces if so
-      word_list[i] = word_list[i].trim();
-      // add all words to lowercase, check all banned words at lowercase
-      word_list[i] = word_list[i].replaceAll(/[|&;$%@"<>()+#!,]/g, "").toLowerCase();
-      if(word_list[i].length>0){
-        // if the word still exists after being stripped,
-        // it is added to result array final_word_list
-        final_word_list.push(word_list[i]);
-      }
-    }
-    if(final_word_list.length<1){
-      // nothing added after the command, tell the user to
-      msg.reply(`Please type the word to add.`);
+  else if(msg.content.startsWith('--add bp') && checkUserPerms(msg) == 0){
+    // add new banned phrase(s)
+    var res2 = await bc.handleAddBps(msg.content, msg.guildId);
+    if(res2){
+      var show_bp = await bc.handleShowBp(msg.guildId);
+      msg.reply(show_bp);
+      return;
     }else{
-      // add the word to the db
-      console.log(final_word_list)
-      try{
-        //var res = await db.findByGuildId(msg.guildId);
-        var result = await db.upsertItemByGuildId(msg.guildId, final_word_list);
-        if(result){
-          msg.reply(`Successfully added word(s) to banned phrases list. Please use the --show bp command to see them!`);
-        }else{
-          msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
-        }
-      }catch(error){
-        console.error(error);
-        msg.reply(`Error adding word(s) to banned phrases list, please try again or check the documentation.`);
-      }
+      msg.reply("Error adding please try again later.");
+      return;
     }
+    return;
+  }
+  else if(msg.content.startsWith('--remove bp') && checkUserPerms(msg) == 0){
+    // remove banned phrase(s)
+    var res3 = await bc.handleRemoveBp(msg.content, msg.guildId);
+    if(res3){
+      var show_bp = await bc.handleShowBp(msg.guildId);
+      msg.reply(show_bp);
+      return;
+    }else{
+      msg.reply("Error removing please try again later.");
+      return;
+    }
+    return;
+  }
+  else if(msg.content.includes('--help')){
+    // give the user documentation on how to use the
+    // bot.
+    msg.reply(`Documentation not yet written :(`);
+  }else if(msg.content.includes('--clear bp') && checkUserPerms(msg) == 0){
+    // clears all the banned phrases for the server.
+    console.log("remove all");
   }
 });
 
 
+function checkUserPerms(msg){
+  // if cmd was sent by server owner or a user with
+  // a mod role, then success, cmd can be used, else
+  // bad >:(
+  if(msg.author.id == msg.guild.ownerId){
+    return 0;
+  }
+  if(msg.member.roles.cache.some(role=>role.name === "mod")){
+    return 0;
+  }
+  msg.reply("Sorry, only the server owner and people with the \`mod\` role can do this!");
+  return 1;
+}
+
+
+
+function checkCmdValidity(msg){
+  // not the bot sending the message and the msg contains a command
+  if(msg.author.id == client.application.id){
+    return 1;
+  }
+
+  // check if a cmd is actually included in the msg
+  for(var i=0; i<command_list.length; i++){
+    if(msg.content.includes(command_list[i])){
+      // if the message contains the cmd, return 0
+      return 1;
+    }
+  }
+  return 0;
+}
 
 
 client.login(process.env.CLIENT_TOKEN); // enter token
