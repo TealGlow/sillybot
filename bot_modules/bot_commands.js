@@ -3,6 +3,7 @@
 */
 
 const db = require('../dbtools/db_funcs');
+const cleaner = require('../user_input_cleaner');
 
 exports.handleShowBp = async function(guildId){
   // handle showing bp for a guild.
@@ -29,7 +30,7 @@ exports.handleAddBps = async function(toAdd, guildId){
   // the db based on the guild id.
   var words = toAdd.replace('--add bp', "");
   // cleaning the word list a little
-  final_word_list = await cleanUserInputIntoArray(words);
+  final_word_list = await cleaner.cleanUserInputIntoArray(words);
 
   if(final_word_list.length<1){
     // nothing added after the command, tell the user to
@@ -52,7 +53,7 @@ exports.handleAddBps = async function(toAdd, guildId){
 exports.handleRemoveBp = async function(toRemove, guildId){
   var words = toRemove.replace('--remove bp', "");
   // cleaning the word list a little
-  final_word_list = await cleanUserInputIntoArray(words);
+  final_word_list = await cleaner.cleanUserInputIntoArray(words);
 
   console.log(final_word_list);
   if(final_word_list.length<1){
@@ -69,23 +70,4 @@ exports.handleRemoveBp = async function(toRemove, guildId){
       return false;
     }
   }
-}
-
-// function for cleaning user input
-const cleanUserInputIntoArray = async function(toClean){
-  var word_list = toClean.split(',');
-  var final_word_list=[]
-
-  for(var i=0; i<word_list.length; i++){
-    // remove leading spaces if so
-    word_list[i] = word_list[i].trim();
-    // add all words to lowercase, check all banned words at lowercase
-    word_list[i] = word_list[i].replaceAll(/[|&;$%@"<>()+#!,]/g, "").toLowerCase();
-    if(word_list[i].length>0){
-      // if the word still exists after being stripped,
-      // it is added to result array final_word_list
-      final_word_list.push(word_list[i]);
-    }
-  }
-  return final_word_list
 }

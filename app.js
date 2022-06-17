@@ -44,63 +44,34 @@ client.on('messageCreate', async (msg)=>{
 
   // check each message for a banned phrase
   if(checkCmdValidity(msg) == 0){
-    try{
-      var res = await db.findByGuildId(msg.guildId);
-      const msg_check = await bp.bannedPhrases(msg, res);
-      if(msg_check){
-        const msg_reply = {
-          content:"Message contains banned phrase, please spoiler tag your message!",
-          files: ["./img/caught.png"]
-        };
-        msg.reply(msg_reply);
-      }
-    }catch(error){
-      console.error(error);
-    }
+    // normal message filtering
+    return await handleNormalMessageFiltering(msg);
   }
-
   // BOT COMMANDS
   if(msg.content.startsWith('--show bp')){
-    // shows the banned phrases
-    var res1 = await bc.handleShowBp(msg.guildId);
-    msg.reply(res1);
-    return;
+    // show all bps
+    return await handleShow(msg);
   }
   else if(msg.content.startsWith('--add bp') && checkUserPerms(msg) == 0){
     // add new banned phrase(s)
-    var res2 = await bc.handleAddBps(msg.content, msg.guildId);
-    if(res2){
-      var show_bp = await bc.handleShowBp(msg.guildId);
-      msg.reply(show_bp);
-      return;
-    }else{
-      msg.reply("Error adding please try again later.");
-      return;
-    }
-    return;
+    return await handleAdd(msg);
   }
   else if(msg.content.startsWith('--remove bp') && checkUserPerms(msg) == 0){
     // remove banned phrase(s)
-    var res3 = await bc.handleRemoveBp(msg.content, msg.guildId);
-    if(res3){
-      var show_bp = await bc.handleShowBp(msg.guildId);
-      msg.reply(show_bp);
-      return;
-    }else{
-      msg.reply("Error removing please try again later.");
-      return;
-    }
-    return;
+    return await handleRemove(msg);
   }
-  else if(msg.content.includes('--help')){
+  else if(msg.content.startsWith('--help')){
     // give the user documentation on how to use the
     // bot.
     msg.reply(`Documentation not yet written :(`);
-  }else if(msg.content.includes('--clear bp') && checkUserPerms(msg) == 0){
+    return;
+  }else if(msg.content.startsWith('--clear bp') && checkUserPerms(msg) == 0){
     // clears all the banned phrases for the server.
     console.log("remove all");
+    return;
   }
 });
+
 
 
 function checkUserPerms(msg){
@@ -118,6 +89,58 @@ function checkUserPerms(msg){
 }
 
 
+async function handleNormalMessageFiltering(msg){
+  try{
+    var res = await db.findByGuildId(msg.guildId);
+    const msg_check = await bp.bannedPhrases(msg, res);
+    if(msg_check){
+      const msg_reply = {
+        content:"Message contains banned phrase, please spoiler tag your message!",
+        files: ["./img/caught.png"]
+      };
+      msg.reply(msg_reply);
+    }
+  }catch(error){
+    console.error(error);
+  }
+}
+
+
+async function handleAdd(msg){
+  var res = await bc.handleAddBps(msg.content, msg.guildId);
+  if(res){
+    var show_bp = await bc.handleShowBp(msg.guildId);
+    msg.reply(show_bp);
+    return;
+  }else{
+    msg.reply("Error adding please try again later.");
+    return;
+  }
+  return;
+}
+
+
+
+async function handleShow(msg){
+  var res = await bc.handleShowBp(msg.guildId);
+  msg.reply(res);
+  return;
+}
+
+
+async function handleRemove(msg){
+  var res = await bc.handleRemoveBp(msg.content, msg.guildId);
+  if(res){
+    var show_bp = await bc.handleShowBp(msg.guildId);
+    msg.reply(show_bp);
+    return;
+  }else{
+    msg.reply("Error removing please try again later.");
+    return;
+  }
+  return;
+}
+
 
 function checkCmdValidity(msg){
   // not the bot sending the message and the msg contains a command
@@ -134,6 +157,7 @@ function checkCmdValidity(msg){
   }
   return 0;
 }
+
 
 
 client.login(process.env.CLIENT_TOKEN); // enter token
