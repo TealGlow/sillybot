@@ -17,7 +17,8 @@ exports.bannedPhrases = function(msg, banned_word_list){
 
   if(rm.length > 0){
     for(var i=0; i<banned_word_list.length; i++){
-      if(rm.includes(banned_word_list[i])){
+      console.log(rm);
+      if(rm == banned_word_list[i]){
         // message includes banned word, do something about that
         return true;
       }
