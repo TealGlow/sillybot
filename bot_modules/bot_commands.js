@@ -71,3 +71,13 @@ exports.handleRemoveBp = async function(toRemove, guildId){
     }
   }
 }
+
+exports.handleClearBp = async function(guildId){
+  try{
+      var results = await db.clearBannedPhraseListForServer(guildId);
+      return results;
+  }catch(error){
+    console.error(error);
+    return false;
+  }
+}

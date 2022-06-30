@@ -7,7 +7,8 @@ const db = require('./dbtools/db_funcs');
 const command_list = [
   '--show bp',
   '--remove bp',
-  '--add bp'
+  '--add bp',
+  '--clear bp'
 ];
 
 // create a new Discord Client
@@ -67,11 +68,9 @@ client.on('messageCreate', async (msg)=>{
     return;
   }else if(msg.content.startsWith('--clear bp') && checkUserPerms(msg) == 0){
     // clears all the banned phrases for the server.
-    console.log("remove all");
-    return;
+    return await handleRemoveAll(msg);
   }
 });
-
 
 
 function checkUserPerms(msg){
@@ -159,5 +158,16 @@ function checkCmdValidity(msg){
 }
 
 
+async function handleRemoveAll(msg){
+  console.log("removing");
+  var res = await bc.handleClearBp(msg.guildId);
+  if(res){
+    msg.reply("Successfully cleared banned phrases list for this server.");
+    return;
+  }else{
+    msg.reply("Error clearing banned phrases list for the server.");
+    return;
+  }
+}
 
 client.login(process.env.CLIENT_TOKEN); // enter token

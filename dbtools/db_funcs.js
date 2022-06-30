@@ -123,6 +123,21 @@ exports.removeItemsInList = async function(guildId, toRemove){
   }
 }
 
+exports.clearBannedPhraseListForServer = async function(guildId){
+  let success = false;
+  try{
+    await Client.connect();
+    success = await deleteListingByGuildId(myDb, guildId);
+  }catch(error){
+    console.error(error);
+    return false;
+  }finally{
+    //close the connection
+    await Client.close();
+    return success;
+  }
+}
+
 // READ ONE ITEM (SEARCH FOR ONE ITEM)
 async function findOneGuildListById(myDb, guildId){
   /*
