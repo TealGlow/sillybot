@@ -220,6 +220,7 @@ async function deleteListingByGuildId(myDb, guildIdToDelete){
   const result = await myDb.deleteOne({guildId:guildIdToDelete});
 
   console.log(`${result.deletedCount} guild(s) deleted.`);
+  return result;
 }
 
 
